@@ -66,9 +66,15 @@
   "Get text property from the overlays below the cursor."
   (let* ((ovs (pic--find-overlays-specifying))
 	 (ov (car ovs)))
-    (if ov
+    (if (overlayp ov)
 	(overlay-get ov 'after-string)
       "")))
+
+(defun pic--exist-overlays ()
+  (let* ((ovs (pic--find-overlays-specifying))
+	 (ov (car ovs)))
+    (if (overlayp ov)
+	ov)))
 
 (defun generate-inline-phantom-comment (msg)
   "Generate overlay below the cursor with MSG."
@@ -139,9 +145,19 @@
 
 (defun phantom-inline-comment-add ()
   "Add phantom inline comment below line of the cursor."
-  (interactive)
   (setq phantom-inline-comment-state 'add)
   (phantom-inline-comment--display-edit-buffer))
+
+(defun phantom-inline-comment-edit-below ()
+  "Edit phantom inline comment below line of the cursor."
+  (setq phantom-inline-comment-state 'edit)
+  (phantom-inline-comment--edit-below))
+
+(defun phantom-inline-comment ()
+  (interactive)
+  (if (pic--exist-overlays)
+      (phantom-inline-comment-edit-below)
+    (phantom-inline-comment-add)))
 
 (defun phantom-inline-comment-delete-below()
   "Delete phantom inline comment below line of the cursor."
@@ -152,12 +168,6 @@
   "Delete all the phantom inline comments."
   (interactive)
   (phantom-inline-comment--delete-all))
-
-(defun phantom-inline-comment-edit-below ()
-  "Edit phantom inline comment below line of the cursor."
-  (interactive)
-  (setq phantom-inline-comment-state 'edit)
-  (phantom-inline-comment--edit-below))
 
 ;; * provide
 
