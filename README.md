@@ -22,7 +22,7 @@ This package is useful when leaving a little note on the source code for yoursel
 
 ## Usage
 
-### Add/Edit a phantom
+### Add/Edit a phantom comment
 
 + `phantom-inline-comment`
 
@@ -31,7 +31,7 @@ After popup edit-buffer, you can write it.
 
 ![gif]()
 
-### Delete a specific phantom
+### Delete a specific phantom comment
 
 + `phantom-inline-comment-delete`
 
@@ -39,7 +39,7 @@ Delete one phantom under a line of the cursor.
 
 ![gif]()
 
-### Delete All phantoms
+### Delete All phantom comments
 
 + `phantom-inline-comment-delete-all`
 

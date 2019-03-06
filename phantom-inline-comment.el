@@ -109,7 +109,7 @@
    (generate-new-buffer phantom-inline-comment-edit-buffer))
   (phantom-inline-comment-minor-mode 1))
 
-(defun phantom-inline-comment--delete ()
+(defun phantom-inline-comment--delete-below ()
   "Delete overlay after Find it."
   (interactive)
   (let* ((ovs (pic--find-overlays-specifying))
@@ -127,7 +127,7 @@
 	   (phantom-inline-comment--add str))
 	  ((eq phantom-inline-comment-state 'edit)
 	   (phantom-inline-comment--add str)
-	   (phantom-inline-comment--delete)))))
+	   (phantom-inline-comment--delete-below)))))
 
 (defun phantom-inline-comment--edit-below ()
   "Edit text on overlay and Open edit-buffer."
@@ -163,7 +163,7 @@
 (defun phantom-inline-comment-delete()
   "Delete phantom inline comment below line of the cursor."
   (interactive)
-  (phantom-inline-comment--delete))
+  (phantom-inline-comment--delete-below))
 
 (defun phantom-inline-comment-delete-all ()
   "Delete all the phantom inline comments."
