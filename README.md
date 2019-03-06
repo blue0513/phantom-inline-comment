@@ -9,7 +9,7 @@ i.e. even if you write comments, no changes will be made in the source code.
 
 This package is useful when leaving a little note on the source code for yourself.
 
-[![Image from Gyazo](https://i.gyazo.com/de667572d7f1e5d5acda58c675bc08fc.gif)](https://gyazo.com/de667572d7f1e5d5acda58c675bc08fc)
+[![Image from Gyazo](https://i.gyazo.com/cefc091eb849b160901e221a23cc2885.gif)](https://gyazo.com/cefc091eb849b160901e221a23cc2885)
 
 ## Setup
 
