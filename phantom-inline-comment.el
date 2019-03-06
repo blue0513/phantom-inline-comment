@@ -13,6 +13,16 @@
 
 (defvar inline--phantom-comments nil)
 
+(defun pic--find-overlays-specifying ()
+  (let ((overlays (overlays-at (point-at-eol)))
+	found)
+    (while overlays
+      (let ((overlay (car overlays)))
+	(if (overlay-get overlay 'phantom)
+	    (setq found (cons overlay found))))
+      (setq overlays (cdr overlays)))
+    found))
+
 (defun generate-inline-phantom-comment (msg)
   (pcase-let* ((pos-eol (point-at-eol))
 	       (ov (make-overlay pos-eol (1+ pos-eol)))
@@ -39,6 +49,11 @@
    (generate-new-buffer phantom-inline-comment-edit-buffer))
   (phantom-inline-comment-minor-mode 1))
 
+(defun phantom-inline-comment--delete-below ()
+  (interactive)
+  (let* ((ovs (pic--find-overlays-specifying)))
+    (phantom-inline-comment--delete (car ovs))))
+
 (defun phantom-inline-comment--apply-buffer ()
   (interactive)
   (let* ((str (buffer-string)))
@@ -50,6 +65,10 @@
 (defun phantom-inline-comment-add ()
   (interactive)
   (phantom-inline-comment--display-edit-buffer))
+
+(defun phantom-inline-comment-delete-below()
+  (interactive)
+  (phantom-inline-comment--delete-below))
 
 (defun phantom-inline-comment-delete-all ()
   (interactive)
