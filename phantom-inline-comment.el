@@ -64,8 +64,11 @@
 
 (defun pic--get-overlays-after-string ()
   "Get text property from the overlays below the cursor."
-  (let* ((ovs (pic--find-overlays-specifying)))
-    (overlay-get (car ovs) 'after-string)))
+  (let* ((ovs (pic--find-overlays-specifying))
+	 (ov (car ovs)))
+    (if ov
+	(overlay-get ov 'after-string)
+      "")))
 
 (defun generate-inline-phantom-comment (msg)
   "Generate overlay below the cursor with MSG."
@@ -90,7 +93,8 @@
 (defun phantom-inline-comment--delete-all ()
   "Delete all the overlays in the stack."
   (mapc #'phantom-inline-comment--delete inline--phantom-comments)
-  (setq inline--phantom-comments nil))
+  (setq inline--phantom-comments nil)
+  (message "All the phantom inline comments are deleted!"))
 
 (defun phantom-inline-comment--display-edit-buffer ()
   "Open popup-window to edit a phantom inline comment."
@@ -102,8 +106,11 @@
 (defun phantom-inline-comment--delete-below ()
   "Delete overlay after Find it."
   (interactive)
-  (let* ((ovs (pic--find-overlays-specifying)))
-    (phantom-inline-comment--delete (car ovs))))
+  (let* ((ovs (pic--find-overlays-specifying))
+	 (ov (car ovs)))
+    (if ov
+	(phantom-inline-comment--delete ov)
+      (message "No phantom inline comment is found"))))
 
 (defun phantom-inline-comment--apply-buffer ()
   "Apply change in edit-buffer to the master buffer."
