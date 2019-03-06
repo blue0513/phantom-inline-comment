@@ -4,6 +4,7 @@
     kmap))
 
 (defvar phantom-inline-comment-edit-buffer "*phantom-inline-comment-edit*")
+(defface phantom-inline-commnet-face '((t (:inherit highlight))) nil)
 
 (define-minor-mode phantom-inline-comment-minor-mode
   :init-value nil
@@ -31,9 +32,10 @@
   (pcase-let* ((pos-eol (point-at-eol))
 	       (ov (make-overlay pos-eol (1+ pos-eol)))
 	       (str (concat (when (eq pos-eol (point-max)) "\n")
-			    msg "\n")))
+			    msg "\n"))
+	       (propertized-str (propertize str 'face 'phantom-inline-commnet-face)))
     (overlay-put ov 'phantom t)
-    (overlay-put ov 'after-string str)
+    (overlay-put ov 'after-string propertized-str)
     ov))
 
 (defun phantom-inline-comment--delete (phantom)
