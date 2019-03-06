@@ -23,6 +23,10 @@
       (setq overlays (cdr overlays)))
     found))
 
+(defun pic--get-overlays-after-string ()
+  (let* ((ovs (pic--find-overlays-specifying)))
+    (overlay-get (car ovs) 'after-string)))
+
 (defun generate-inline-phantom-comment (msg)
   (pcase-let* ((pos-eol (point-at-eol))
 	       (ov (make-overlay pos-eol (1+ pos-eol)))
@@ -60,6 +64,12 @@
     (popwin:close-popup-window)
     (phantom-inline-comment--add str)))
 
+(defun phantom-inline-comment--edit-below ()
+  (let* ((prev-comment (pic--get-overlays-after-string)))
+    (phantom-inline-comment-delete-below)
+    (phantom-inline-comment-add)
+    (insert prev-comment)))
+
 ;;; Main Functions
 
 (defun phantom-inline-comment-add ()
@@ -73,3 +83,7 @@
 (defun phantom-inline-comment-delete-all ()
   (interactive)
   (phantom-inline-comment--delete-all))
+
+(defun phantom-inline-comment-edit-below ()
+  (interactive)
+  (phantom-inline-comment--edit-below))
