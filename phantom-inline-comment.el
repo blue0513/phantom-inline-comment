@@ -1,10 +1,12 @@
 (defvar phantom-inline-comment-minor-mode-map
   (let ((kmap (make-sparse-keymap)))
-    (define-key kmap (kbd "C-g") 'phantom-inline-comment--apply-buffer)
+    (define-key kmap (kbd "C-c C-c") 'phantom-inline-comment--apply-buffer)
+    (define-key kmap (kbd "C-g") 'phantom-inline-comment--cancel)
     kmap))
 
 (defvar phantom-inline-comment-edit-buffer "*phantom-inline-comment-edit*")
 (defface phantom-inline-commnet-face '((t (:inherit highlight))) nil)
+(defvar phantom-inline-comment-state nil) ;; 'add or 'edit
 
 (define-minor-mode phantom-inline-comment-minor-mode
   :init-value nil
@@ -64,18 +66,27 @@
   (interactive)
   (let* ((str (buffer-string)))
     (popwin:close-popup-window)
-    (phantom-inline-comment--add str)))
+    (cond ((eq phantom-inline-comment-state 'add)
+	   (phantom-inline-comment--add str))
+	  ((eq phantom-inline-comment-state 'edit)
+	   (phantom-inline-comment--add str)
+	   (phantom-inline-comment--delete-below)))))
 
 (defun phantom-inline-comment--edit-below ()
-  (let* ((prev-comment (pic--get-overlays-after-string)))
-    (phantom-inline-comment-delete-below)
-    (phantom-inline-comment-add)
-    (insert prev-comment)))
+  (let* ((prev-comment (pic--get-overlays-after-string))
+	 (raw-prev-comment (substring-no-properties prev-comment)))
+    (phantom-inline-comment--display-edit-buffer)
+    (insert raw-prev-comment)))
+
+(defun phantom-inline-comment--cancel ()
+  (interactive)
+  (popwin:close-popup-window))
 
 ;;; Main Functions
 
 (defun phantom-inline-comment-add ()
   (interactive)
+  (setq phantom-inline-comment-state 'add)
   (phantom-inline-comment--display-edit-buffer))
 
 (defun phantom-inline-comment-delete-below()
@@ -88,4 +99,5 @@
 
 (defun phantom-inline-comment-edit-below ()
   (interactive)
+  (setq phantom-inline-comment-state 'edit)
   (phantom-inline-comment--edit-below))
