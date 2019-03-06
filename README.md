@@ -24,19 +24,19 @@ This package is useful when leaving a little note on the source code for yoursel
 
 ### Add/Edit a phantom comment
 
-+ `phantom-inline-comment`
++ `M-x phantom-inline-comment`
 
-Add one phantom under a line of the cursor.  
+Add or Edit one phantom under a line of the cursor.  
 After popup edit-buffer, you can write it.
 
 ### Delete a specific phantom comment
 
-+ `phantom-inline-comment-delete`
++ `M-x phantom-inline-comment-delete`
 
 Delete one phantom under a line of the cursor.
 
 ### Delete All phantom comments
 
-+ `phantom-inline-comment-delete-all`
++ `M-x phantom-inline-comment-delete-all`
 
 Delete all the phantoms.
