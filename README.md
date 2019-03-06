@@ -27,7 +27,8 @@ This package is useful when leaving a little note on the source code for yoursel
 + `M-x phantom-inline-comment`
 
 Add or Edit one phantom under a line of the cursor.  
-After popup edit-buffer, you can write it.
+After popup edit-buffer, you can write it.  
+Then `C-c C-c` to apply change and `C-g` to cancel.
 
 ### Delete a specific phantom comment
 
