@@ -7,7 +7,8 @@ Add visible inline-comments, which do not swear the source code as _phantom_.
 You can add inline-comments which can be visible but does not affect the source code, 
 i.e. even if you write comments, no changes will be made in the source code.
 
-This package is useful when leaving a little note on the source code for yourself.
+This package is useful when leaving a little note on the source code for yourself.  
+For example, when you write codes tottally from scratch or when you read complex codes.
 
 [![Image from Gyazo](https://i.gyazo.com/cefc091eb849b160901e221a23cc2885.gif)](https://gyazo.com/cefc091eb849b160901e221a23cc2885)
 
