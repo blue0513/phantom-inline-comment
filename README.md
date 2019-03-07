@@ -1,6 +1,6 @@
 # Phantom Inline Comment
 
-Add visible inline-comments but they don't swear the code as _phantom_.
+Add visible inline-comments, which do not swear the source code as _phantom_.
 
 ## What's This
 
@@ -27,8 +27,8 @@ This package is useful when leaving a little note on the source code for yoursel
 + `M-x phantom-inline-comment`
 
 Add or Edit one phantom under a line of the cursor.  
-After popup edit-buffer, you can write it.  
-Then `C-c C-c` to apply change and `C-g` to cancel.
+After edit-buffer popups, you can write it.  
+Then `C-c C-c` to apply changes and `C-g` to cancel.
 
 ### Delete a specific phantom comment
 
@@ -41,3 +41,8 @@ Delete one phantom under a line of the cursor.
 + `M-x phantom-inline-comment-delete-all`
 
 Delete all the phantoms.
+
+## Current Limitations
+
+Since this package uses `overlay`, the phantom inline comment is not persisted.  
+After you quit emacs, the phantom inline comment you created will disappear.
