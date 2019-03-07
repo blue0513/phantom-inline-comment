@@ -46,6 +46,7 @@
 (defvar phantom-inline-comment-show-buffer "*phantom-inline-comments*")
 
 (defvar phantom-inline-comment-state nil) ;; 'add or 'edit
+(defvar phantom-inline-comment-visibility 'show) ;; 'hide or 'show
 
 (defvar inline--phantom-comments nil)
 
@@ -123,6 +124,20 @@
     (overlay-put ov 'after-string propertized-str)
     ov))
 
+(defun pic--toggle-text-visibility (phantom bool)
+  "Modify visibility of PHANTOM comment depends on BOOL."
+  (if (overlayp phantom)
+      (let* ((str (overlay-get phantom 'after-string)))
+	(put-text-property 0 (max 0 (- (length str) 1)) 'invisible bool str))))
+
+(defun phantom-inline-comment--hide (phantom)
+  "Fold PHANTOM."
+  (pic--toggle-text-visibility phantom t))
+
+(defun phantom-inline-comment--open (phantom)
+  "Unfold PHANTOM."
+  (pic--toggle-text-visibility phantom nil))
+
 (defun phantom-inline-comment--delete (phantom)
   "Delete overlay with PHANTOM property."
   (when (overlay-get phantom 'phantom)
@@ -165,6 +180,14 @@
 	   (phantom-inline-comment--add str)
 	   (phantom-inline-comment--delete-below)))))
 
+(defun phantom-inline-comment--toggle-all ()
+  "Toggle visibility of phantom comments."
+  (interactive)
+  (cond ((eq phantom-inline-comment-visibility 'show)
+	 (phantom-inline-comment--hide-all))
+	((eq phantom-inline-comment-visibility 'hide)
+	 (phantom-inline-comment--open-all))))
+
 (defun phantom-inline-comment--edit-below ()
   "Edit text on overlay and Open edit-buffer."
   (let* ((prev-comment (pic--get-overlays-after-string))
@@ -200,6 +223,20 @@
   "Show all phantom overlays."
   (apply #'phantom-inline-comment--show
 	 (pic--build-file-info-list)))
+
+(defun phantom-inline-comment--hide-all ()
+  "Fold all the phantoms."
+  (let* ((overlays inline--phantom-comments))
+    (mapc #'phantom-inline-comment--hide overlays)
+    (setq phantom-inline-comment-visibility 'hide)
+    (message "All the phantom inline comments are hidden!")))
+
+(defun phantom-inline-comment--open-all ()
+  "Unfold all the phantoms."
+  (let* ((overlays inline--phantom-comments))
+    (mapc #'phantom-inline-comment--open overlays)
+    (setq phantom-inline-comment-visibility 'show)
+    (message "All the phantom inline comments are appeared!")))
 
 (defun phantom-inline-comment--cancel ()
   "Close popup-window."
@@ -239,6 +276,11 @@
   "Show all the phantom inline comments."
   (interactive)
   (phantom-inline-comment--show-all))
+
+(defun phantom-inline-comment-toggle-all ()
+  "Fold/Unfold all the phantom inline comments."
+  (interactive)
+  (phantom-inline-comment--toggle-all))
 
 ;; * provide
 
