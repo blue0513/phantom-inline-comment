@@ -50,6 +50,12 @@ Delete all the phantoms.
 Show all the phantoms.  
 Then select a file and `RET` to jump to the phantom comment.
 
+### Fold/Unfold All the phantom comments
+
++ `M-x phantom-inline-comment-toggle-all`
+
+Fold or Unfold all the phantoms.
+
 ## Current Limitations
 
 Since this package uses `overlay`, the phantom inline comment is not persisted.  
