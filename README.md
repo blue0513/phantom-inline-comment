@@ -43,6 +43,13 @@ Delete one phantom under a line of the cursor.
 
 Delete all the phantoms.
 
+### Show All phantom comments
+
++ `M-x phantom-inline-comment-show-all`
+
+Show all the phantoms.  
+Then select a file and `RET` to jump to the phantom comment.
+
 ## Current Limitations
 
 Since this package uses `overlay`, the phantom inline comment is not persisted.  

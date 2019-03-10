@@ -37,19 +37,34 @@
     (define-key kmap (kbd "C-g") 'phantom-inline-comment--cancel)
     kmap))
 
+(defvar phantom-inline-comment-show-mode-map
+  (let ((kmap (make-sparse-keymap)))
+    (define-key kmap (kbd "RET") 'phantom-goto-comment)
+    kmap))
+
 (defvar phantom-inline-comment-edit-buffer "*phantom-inline-comment-edit*")
+(defvar phantom-inline-comment-show-buffer "*phantom-inline-comments*")
 
 (defvar phantom-inline-comment-state nil) ;; 'add or 'edit
 
 (defvar inline--phantom-comments nil)
 
 (defface phantom-inline-commnet-face '((t (:inherit highlight))) nil)
+(defface phantom-inline-commnet-list-face '((t (:foreground "purple"))) nil)
 
 (define-minor-mode phantom-inline-comment-minor-mode
   :init-value nil
   :global nil
   :keymap phantom-inline-comment-minor-mode-map
   :lighter " Phantom")
+
+(defun phantom-show-mode nil
+  "Major mode for `phantom-show-mode' buffers."
+  (interactive)
+  (kill-all-local-variables)
+  (setq major-mode 'phantom-show-mode)
+  (setq mode-name "phantom-comments")
+  (use-local-map phantom-inline-comment-show-mode-map))
 
 (defun pic--find-overlays-specifying ()
   "Find overlays below the cursor."
@@ -75,6 +90,27 @@
 	 (ov (car ovs)))
     (if (overlayp ov)
 	ov)))
+
+(defun pic--build-file-info-list ()
+  (let* ((header "FileName:LineNum/Comment")
+	 (phantoms inline--phantom-comments)
+	 (raw-file-info-list
+	  (mapconcat
+	   #'(lambda (phantom)
+	       (with-current-buffer (overlay-buffer phantom)
+		 (let* ((line (s-trim-left (buffer-substring (overlay-start phantom)
+							     (overlay-end phantom))))
+			(line-num (count-lines (point-min) (overlay-start phantom)))
+			(comment (overlay-get phantom 'after-string))
+			(string
+			 (concat (format "%s:%d %s" (buffer-name) line-num comment))))
+		   (put-text-property 0 (length string) 'phantom-buffer (buffer-name) string)
+		   (put-text-property 0 (length string) 'phantom-comment line-num string)
+		   string)))
+	   phantoms
+	   " "))
+	 (file-info-list (split-string raw-file-info-list)))
+    (list header file-info-list)))
 
 (defun generate-inline-phantom-comment (msg)
   "Generate overlay below the cursor with MSG."
@@ -136,12 +172,39 @@
     (phantom-inline-comment--display-edit-buffer)
     (insert raw-prev-comment)))
 
+(defun phantom-goto-comment ()
+  (interactive)
+  (let ((buffer-name (get-text-property (point) 'phantom-buffer))
+	(line (get-text-property (point) 'phantom-comment)))
+    (if (null buffer-name)
+	(message "No phantom comment at this line.")
+      (pop-to-buffer (get-buffer buffer-name))
+      (goto-line line))))
+
+(defun phantom-inline-comment--show (header lines)
+  (if (= (length lines) 0)
+      (message "No phantom inline comments found.")
+    (popwin:popup-buffer
+     (generate-new-buffer phantom-inline-comment-show-buffer))
+    (phantom-show-mode)
+    (dolist (line lines)
+      (let* ((line-info
+	      (propertize
+	       line 'font-lock-face 'phantom-inline-commnet-list-face)))
+	(insert (concat line-info "\n"))))
+    (setq header-line-format
+	  (concat (propertize " " 'display '((space :align-to 0))) header))
+    (setq buffer-read-only t)))
+
+(defun phantom-inline-comment--show-all ()
+  "Show all phantom overlays."
+  (apply #'phantom-inline-comment--show
+	 (pic--build-file-info-list)))
+
 (defun phantom-inline-comment--cancel ()
   "Close popup-window."
   (interactive)
   (popwin:close-popup-window))
-
-;;; Main Functions
 
 (defun phantom-inline-comment-add ()
   "Add phantom inline comment below line of the cursor."
@@ -152,6 +215,8 @@
   "Edit phantom inline comment below line of the cursor."
   (setq phantom-inline-comment-state 'edit)
   (phantom-inline-comment--edit-below))
+
+;;; Main Functions
 
 (defun phantom-inline-comment ()
   "Add or Edit phantom inline comment below line of the cursor."
@@ -169,6 +234,11 @@
   "Delete all the phantom inline comments."
   (interactive)
   (phantom-inline-comment--delete-all))
+
+(defun phantom-inline-comment-show-all ()
+  "Show all the phantom inline comments."
+  (interactive)
+  (phantom-inline-comment--show-all))
 
 ;; * provide
 
