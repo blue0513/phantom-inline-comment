@@ -60,3 +60,23 @@ Fold or Unfold all the phantoms.
 
 Since this package uses `overlay`, the phantom inline comment is not persisted.  
 After you quit emacs, the phantom inline comment you created will disappear.
+
+To solve this problem, see Experimental section below.
+
+### Experimental: Persistent Phantoms
+
+**It's only experimental functions and not recommended.**
+
+In init.el, you can add settings as bellow.
+
+```elisp
+;; Save phantom-inline-comments when quit Emacs
+(phantom-inline-comment-auto-save-mode t)
+
+;; Restore phantom-inline-comments when open files
+(add-hook 'SOME-MODE-hook 'phantom-inline-comment-auto-restore-mode)
+```
+
+It allows you to save all the comments into the data-file (default `~/.phantom-inline-comments`), before you quit Emacs.  
+And when you open the file you added comments, automatically the data-file will be loaded and the comments will be added again.
+
