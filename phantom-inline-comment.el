@@ -49,6 +49,7 @@
 (defvar phantom-inline-comment-visibility 'show) ;; 'hide or 'show
 
 (defvar inline--phantom-comments nil)
+(defvar phantom-inline-comment-target-buffer nil)
 
 (defface phantom-inline-commnet-face '((t (:inherit highlight))) nil)
 (defface phantom-inline-commnet-list-face '((t (:foreground "purple"))) nil)
@@ -116,7 +117,8 @@
 (defun generate-inline-phantom-comment (msg)
   "Generate overlay below the cursor with MSG."
   (pcase-let* ((pos-eol (point-at-eol))
-	       (ov (make-overlay pos-eol (1+ pos-eol)))
+	       (buffer phantom-inline-comment-target-buffer)
+	       (ov (make-overlay pos-eol (1+ pos-eol) buffer))
 	       (str (concat (when (eq pos-eol (point-max)) "\n")
 			    msg "\n"))
 	       (propertized-str (propertize str 'face 'phantom-inline-commnet-face)))
@@ -182,6 +184,7 @@
   (interactive)
   (let* ((str (buffer-string)))
     (popwin:close-popup-window)
+    (pop-to-buffer phantom-inline-comment-target-buffer)
     (cond ((eq phantom-inline-comment-state 'add)
 	   (phantom-inline-comment--add str))
 	  ((eq phantom-inline-comment-state 'edit)
@@ -254,11 +257,13 @@
 (defun phantom-inline-comment-add ()
   "Add phantom inline comment below line of the cursor."
   (setq phantom-inline-comment-state 'add)
+  (setq phantom-inline-comment-target-buffer (current-buffer))
   (phantom-inline-comment--display-edit-buffer))
 
 (defun phantom-inline-comment-edit-below ()
   "Edit phantom inline comment below line of the cursor."
   (setq phantom-inline-comment-state 'edit)
+  (setq phantom-inline-comment-target-buffer (current-buffer))
   (phantom-inline-comment--edit-below))
 
 ;;; Main Functions
