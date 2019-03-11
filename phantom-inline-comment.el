@@ -130,6 +130,13 @@
       (let* ((str (overlay-get phantom 'after-string)))
 	(put-text-property 0 (max 0 (- (length str) 1)) 'invisible bool str))))
 
+(defun phantom-inline-comment--clean-up-comments ()
+  (let* ((result nil))
+    (dolist (phantom-comment inline--phantom-comments)
+      (if (overlay-start phantom-comment)
+	  (push phantom-comment result)))
+    (setq inline--phantom-comments result)))
+
 (defun phantom-inline-comment--hide (phantom)
   "Fold PHANTOM."
   (pic--toggle-text-visibility phantom t))
@@ -141,7 +148,8 @@
 (defun phantom-inline-comment--delete (phantom)
   "Delete overlay with PHANTOM property."
   (when (overlay-get phantom 'phantom)
-    (delete-overlay phantom)))
+    (delete-overlay phantom))
+  (phantom-inline-comment--clean-up-comments))
 
 (defun phantom-inline-comment--add (msg)
   "Push overlay with MSG to the stack."
