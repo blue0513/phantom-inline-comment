@@ -45,6 +45,8 @@
 (defvar phantom-inline-comment-edit-buffer "*phantom-inline-comment-edit*")
 (defvar phantom-inline-comment-show-buffer "*phantom-inline-comments*")
 
+(defvar phantom-saved-file "~/.phantom-inline-comments")
+
 (defvar phantom-inline-comment-state nil) ;; 'add or 'edit
 (defvar phantom-inline-comment-visibility 'show) ;; 'hide or 'show
 
@@ -59,6 +61,24 @@
   :global nil
   :keymap phantom-inline-comment-minor-mode-map
   :lighter " Phantom")
+
+(define-minor-mode phantom-inline-comment-auto-restore-mode
+  "Minor mode for phantom-inline-comment-auto-restore"
+  :init-value nil
+  :global nil
+  :lighter " PicAR"
+  (if phantom-inline-comment-auto-restore-mode
+      (add-hook 'find-file-hook 'phantom-inline-comment-restore-data-if-necessary)
+    (remove-hook 'find-file-hook #'phantom-inline-comment-restore-data-if-necessary)))
+
+(define-minor-mode phantom-inline-comment-auto-save-mode
+  "Global minor mode for phantom-inline-comment-auto-save"
+  :init-value nil
+  :global t
+  :lighter " PicAS"
+  (if phantom-inline-comment-auto-save-mode
+      (add-hook 'kill-emacs-hook 'phantom-inline-comment-save-data)
+    (remove-hook 'kill-emacs-hook #'phantom-inline-comment-save-data)))
 
 (defun phantom-show-mode nil
   "Major mode for `phantom-show-mode' buffers."
@@ -93,6 +113,28 @@
     (if (overlayp ov)
 	ov)))
 
+(defun pic--dump-comment-data (data)
+  "Save DATA into annotation file."
+  (with-temp-file phantom-saved-file
+    (if (not (null data))
+	(prin1 data (current-buffer))
+      (erase-buffer))))
+
+(defun pic--read-overlay-data (ov)
+  "Read OV and generate list containing phantom-inlin-comment's info."
+  (let* ((filename (buffer-file-name (overlay-buffer ov)))
+	 (start (overlay-start ov))
+	 (end (overlay-end ov))
+	 (comment (substring-no-properties (overlay-get ov 'after-string))))
+    (list filename start end comment)))
+
+(defun pic--convert-overlay-data (overlays)
+  "Return human readable string list from OVERLAYS."
+  (let* ((result nil))
+    (dolist (overlay overlays)
+      (push (pic--read-overlay-data overlay) result))
+    result))
+
 (defun pic--build-file-info-list ()
   (let* ((header "FileName:LineNum/Comment")
 	 (phantoms inline--phantom-comments)
@@ -113,6 +155,42 @@
 	   " "))
 	 (file-info-list (split-string raw-file-info-list)))
     (list header file-info-list)))
+
+(defun pic--create-overlay-from (filename start end comment)
+  "Generate overlay from FILENAME, START, END, COMMENT."
+  (let* ((buffer (get-file-buffer filename))
+	 (ov (make-overlay start end buffer))
+	 (propertized-str (propertize comment 'face 'phantom-inline-commnet-face)))
+    (overlay-put ov 'phantom t)
+    (overlay-put ov 'after-string propertized-str)
+    ov))
+
+(defun pic--load-data-as-string ()
+  "Return strings in `phantom-saved-file'."
+  (with-temp-buffer
+    (when (file-exists-p phantom-saved-file)
+      (insert-file-contents phantom-saved-file))
+    (buffer-string)))
+
+(defun pic-load-all-data ()
+  (let* ((str (pic--load-data-as-string))
+	 (all-data (if (not (string-equal "" str))
+		       (car (read-from-string str))
+		     nil)))
+    all-data))
+
+(defun pic--check-should-restore-data ()
+  "Check if current-file is target to be restored."
+  (let* ((filenames (pic--filenames-from-saved-data)))
+    (if (buffer-file-name)
+	(member (buffer-file-name) filenames))))
+
+(defun phantom-inline-comment-restore-data-if-necessary ()
+  "Restore `phantom-inline-comment' if needed."
+  (when (pic--check-should-restore-data)
+    (phantom-inline-comment-restore-data)
+    (message "Phantom Inline Comment Restored !")
+    (sit-for 0.5)))
 
 (defun generate-inline-phantom-comment (msg)
   "Generate overlay below the cursor with MSG."
@@ -138,6 +216,13 @@
       (if (overlay-start phantom-comment)
 	  (push phantom-comment result)))
     (setq inline--phantom-comments result)))
+
+(defun pic--filenames-from-saved-data ()
+  (let* ((result nil))
+    (dolist (data (pic-load-all-data))
+      (let* ((filename (nth 0 data)))
+	(push filename result)))
+    result))
 
 (defun phantom-inline-comment--hide (phantom)
   "Fold PHANTOM."
@@ -266,6 +351,21 @@
   (setq phantom-inline-comment-target-buffer (current-buffer))
   (phantom-inline-comment--edit-below))
 
+(defun phantom-inline-comment--save-data ()
+  "Save phantom-inline-comments from `inline--phantom-comments'."
+  (pic--dump-comment-data (pic--convert-overlay-data inline--phantom-comments)))
+
+(defun phantom-inline-comment--restore-data ()
+  "Push stored pahntom-inline-comments into `inline--phantom-comments'."
+  (dolist (data (pic-load-all-data))
+    (let* ((filename (nth 0 data))
+	   (start (nth 1 data))
+	   (end (nth 2 data))
+	   (comment (nth 3 data)))
+      (if (string-equal filename (buffer-file-name))
+	  (push (pic--create-overlay-from filename start end comment) inline--phantom-comments)
+	))))
+
 ;;; Main Functions
 
 (defun phantom-inline-comment ()
@@ -294,6 +394,16 @@
   "Fold/Unfold all the phantom inline comments."
   (interactive)
   (phantom-inline-comment--toggle-all))
+
+(defun phantom-inline-comment-save-data ()
+  "Save phantom-inline-comments from `phantom-save-file'."
+  (interactive)
+  (phantom-inline-comment--save-data))
+
+(defun phantom-inline-comment-restore-data ()
+  "Restore phantom-inline-comments from `phantom-save-file'."
+  (interactive)
+  (phantom-inline-comment--restore-data))
 
 ;; * provide
 
