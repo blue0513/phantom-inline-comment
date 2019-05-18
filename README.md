@@ -77,6 +77,7 @@ In init.el, you can add settings as bellow.
 (add-hook 'SOME-MODE-hook 'phantom-inline-comment-auto-restore-mode)
 ```
 
-It allows you to save all the comments into the data-file (default `~/.phantom-inline-comments`), before you quit Emacs.  
+It allows you to save all the comments into the data-file
+(default `~/.emacs.d/pahtnom-inline-comment` or `~/.phantom-inline-comment` if it exists), before you quit Emacs.  
 And when you open the file you added comments, automatically the data-file will be loaded and the comments will be added again.
 

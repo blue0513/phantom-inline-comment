@@ -45,7 +45,8 @@
 (defvar phantom-inline-comment-edit-buffer "*phantom-inline-comment-edit*")
 (defvar phantom-inline-comment-show-buffer "*phantom-inline-comments*")
 
-(defvar phantom-saved-file "~/.phantom-inline-comments")
+(defvar phantom-saved-file
+  (locate-user-emacs-file "phantom-inline-comments" ".phantom-inline-comments"))
 
 (defvar phantom-inline-comment-state nil) ;; 'add or 'edit
 (defvar phantom-inline-comment-visibility 'show) ;; 'hide or 'show
